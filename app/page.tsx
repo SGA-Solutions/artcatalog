@@ -1,65 +1,116 @@
-import Image from "next/image";
+import Link from "next/link";
+import { client } from "@/sanity/lib/client";
+import { homePageQuery } from "@/lib/sanity-queries";
+import { urlFor } from "@/lib/image-utils";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Artwork } from "@/types";
+import ExhibitionTitle from "@/components/ExhibitionTitle";
 
-export default function Home() {
+// Helper for image URL (I'll create this file next, but using it here)
+// If it doesn't exist yet, I'll need to create it.
+// Actually, I should create lib/image-utils.ts first or inline it.
+// I'll assume I'll create it.
+
+export default async function Home() {
+  const exhibition = await client.fetch(homePageQuery);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-grow pt-20 px-6 mx-auto max-w-[1800px] w-full">
+        {exhibition ? (
+          <section className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div className="space-y-4">
+                <span className="text-xs tracking-[0.2em] text-gray-500 uppercase">Current Exhibition</span>
+                <ExhibitionTitle
+                  value={exhibition.title}
+                  className="text-4xl md:text-5xl font-light tracking-tight leading-tight"
+                />
+                <p className="text-base font-light text-gray-600 max-w-xl leading-relaxed">
+                  {exhibition.theme}
+                </p>
+                {(exhibition.location || exhibition.openHours || exhibition.contactNumber) && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {exhibition.location && (
+                      <p className="flex items-center gap-2">
+                        <span className="text-gray-400">📍</span>
+                        {exhibition.location}
+                      </p>
+                    )}
+                    {exhibition.openHours && (
+                      <p className="flex items-center gap-2">
+                        <span className="text-gray-400">🕒</span>
+                        {exhibition.openHours}
+                      </p>
+                    )}
+                    {exhibition.contactNumber && (
+                      <p className="flex items-center gap-2">
+                        <span className="text-gray-400">📞</span>
+                        <a href={`tel:${exhibition.contactNumber}`} className="hover:text-accent transition-colors">
+                          {exhibition.contactNumber}
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                )}
+                <div className="pt-2">
+                  <Link
+                    href={`/exhibitions/${exhibition.slug.current}`}
+                    className="inline-block border-b border-foreground pb-1 text-sm tracking-widest hover:text-accent hover:border-accent transition-colors"
+                  >
+                    VIEW EXHIBITION
+                  </Link>
+                </div>
+              </div>
+
+              <div className="relative aspect-[4/3] bg-gray-100 shadow-museum">
+                {exhibition.featuredImage && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={urlFor(exhibition.featuredImage).width(1200).url()}
+                    alt={exhibition.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Preview of Artworks */}
+            {exhibition.artworks && exhibition.artworks.length > 0 && (
+              <div className="pt-12">
+                <h2 className="text-xl font-light mb-6">Featured Works</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {exhibition.artworks.slice(0, 3).map((artwork: Artwork) => (
+                    <Link key={artwork.slug.current} href={`/artworks/${artwork.slug.current}`} className="group block">
+                      <div className="aspect-[3/4] bg-gray-50 mb-3 overflow-hidden shadow-sm transition-shadow hover:shadow-museum">
+                        {artwork.image && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={urlFor(artwork.image).width(600).url()}
+                            alt={artwork.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        )}
+                      </div>
+                      <h3 className="text-base font-light group-hover:text-accent transition-colors">{artwork.title}</h3>
+                      <p className="text-sm text-gray-500">{artwork.artist?.name}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        ) : (
+          <div className="flex items-center justify-center h-[60vh]">
+            <p className="text-gray-400 font-light">No exhibitions currently on display.</p>
+          </div>
+        )}
       </main>
+
+      <Footer />
     </div>
   );
 }
