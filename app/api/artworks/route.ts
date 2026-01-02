@@ -10,6 +10,7 @@ export async function GET() {
             title,
             "artist": artist->name,
             "imageUrl": image.asset->url,
+            "imageMarkdown": "![" + title + "](" + image.asset->url + ")",
             year,
             medium,
             dimensions,
