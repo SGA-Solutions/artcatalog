@@ -9,8 +9,9 @@ export async function GET() {
         const query = groq`*[_type == "artwork"]{
             title,
             "artist": artist->name,
-            "imageUrl": image.asset->url,
-            "imageMarkdown": "![" + title + "](" + image.asset->url + ")",
+            "imageUrl": image.asset->url + "?w=900&auto=format",
+            "imageMarkdown": "![" + title + "](" + image.asset->url + "?w=900&auto=format)",
+            "fullMarkdown": "### " + title + "\n\n![" + title + "](" + image.asset->url + "?w=900&auto=format)\n\n**Artist:** " + artist->name + "\n**Year:** " + year + "\n**Medium:** " + medium + "\n**Dimensions:** " + dimensions + "\n**Price:** " + price + "\n\n" + description,
             year,
             medium,
             dimensions,
