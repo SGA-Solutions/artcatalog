@@ -4,11 +4,17 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 
 interface ViewInRoomModalProps {
-    imageUrl: string;
+    imageUrl?: string;
+    imageUrls?: string[];
 }
 
-export default function ViewInRoomModal({ imageUrl }: ViewInRoomModalProps) {
+export default function ViewInRoomModal({ imageUrl, imageUrls }: ViewInRoomModalProps) {
     const [isOpen, setIsOpen] = useState(false);
+
+    // Determine which images to display
+    const images = imageUrls && imageUrls.length > 0 ? imageUrls : imageUrl ? [imageUrl] : [];
+
+    if (images.length === 0) return null;
 
     if (!isOpen) {
         return (
@@ -41,10 +47,26 @@ export default function ViewInRoomModal({ imageUrl }: ViewInRoomModalProps) {
                 {/* Floor */}
                 <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-[#e5e5e5] border-t border-gray-300"></div>
 
-                {/* Artwork */}
-                <div className="relative shadow-2xl max-h-[50%] max-w-[50%] mb-[5%]">
-                    <img src={imageUrl} alt="View in Room" className="max-h-full max-w-full object-contain" />
-                </div>
+                {/* Artwork(s) */}
+                {images.length === 1 ? (
+                    // Single panel artwork
+                    <div className="relative shadow-2xl max-h-[50%] max-w-[50%] mb-[5%]">
+                        <img src={images[0]} alt="View in Room" className="max-h-full max-w-full object-contain" />
+                    </div>
+                ) : (
+                    // Multi-panel artwork (diptych or triptych)
+                    <div className={`relative shadow-2xl max-h-[50%] ${images.length === 2 ? 'max-w-[60%]' : 'max-w-[70%]'} mb-[5%] flex gap-2`}>
+                        {images.map((url, index) => (
+                            <div key={index} className="flex-1">
+                                <img
+                                    src={url}
+                                    alt={`Panel ${index + 1}`}
+                                    className="h-full w-full object-contain"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

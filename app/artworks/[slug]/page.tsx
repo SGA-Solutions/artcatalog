@@ -36,13 +36,18 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
                             panels={artwork.panels}
                             title={artwork.title}
                         />
-                        {/* View in Room Modal - uses first panel for multi-panel artworks */}
+                        {/* View in Room Modal - shows all panels for multi-panel artworks */}
                         {(artwork.image || (artwork.panels && artwork.panels.length > 0)) && (
                             <ViewInRoomModal
                                 imageUrl={
-                                    artwork.artworkType === 'single'
+                                    artwork.artworkType === 'single' && artwork.image
                                         ? urlFor(artwork.image).width(1200).url()
-                                        : urlFor(artwork.panels[0]).width(1200).url()
+                                        : undefined
+                                }
+                                imageUrls={
+                                    artwork.artworkType !== 'single' && artwork.panels
+                                        ? artwork.panels.map((panel: any) => urlFor(panel).width(1200).url())
+                                        : undefined
                                 }
                             />
                         )}
