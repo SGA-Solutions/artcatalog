@@ -64,7 +64,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
                             )}
 
                             {artwork.price && (
-                                <p className="text-xl font-light mb-8">${artwork.price.toLocaleString()}</p>
+                                <p className="text-xl font-light mb-8">PHP {artwork.price.toLocaleString()}</p>
                             )}
                         </div>
 
