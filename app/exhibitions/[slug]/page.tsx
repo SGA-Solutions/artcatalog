@@ -61,25 +61,37 @@ export default async function ExhibitionPage({ params }: { params: Promise<{ slu
 
                 {exhibition.artworks && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-                        {exhibition.artworks.map((artwork: Artwork) => (
-                            <Link key={artwork._id} href={`/artworks/${artwork.slug.current}`} className="group block">
-                                <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-museum">
-                                    {artwork.image && (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img
-                                            src={urlFor(artwork.image).width(800).url()}
-                                            alt={artwork.title}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
-                                    )}
-                                </div>
-                                <div className="text-center">
-                                    <h3 className="text-base font-light group-hover:text-accent transition-colors mb-1">{artwork.title}</h3>
-                                    <p className="text-sm text-gray-500 mb-1">{artwork.artist?.name}</p>
-                                    <p className="text-xs text-gray-400">{artwork.year}</p>
-                                </div>
-                            </Link>
-                        ))}
+                        {exhibition.artworks.map((artwork: Artwork) => {
+                            const thumbnailImage = artwork.artworkType === 'single'
+                                ? artwork.image
+                                : artwork.panels?.[0];
+
+                            return (
+                                <Link key={artwork._id} href={`/artworks/${artwork.slug.current}`} className="group block">
+                                    <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-all duration-500 hover:shadow-museum relative">
+                                        {thumbnailImage && (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={urlFor(thumbnailImage).width(800).url()}
+                                                alt={artwork.title}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                        )}
+                                        {/* Badge for multi-panel artworks */}
+                                        {artwork.artworkType && artwork.artworkType !== 'single' && (
+                                            <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                {artwork.artworkType === 'diptych' ? '2 Panels' : '3 Panels'}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-center">
+                                        <h3 className="text-base font-light group-hover:text-accent transition-colors mb-1">{artwork.title}</h3>
+                                        <p className="text-sm text-gray-500 mb-1">{artwork.artist?.name}</p>
+                                        <p className="text-xs text-gray-400">{artwork.year}</p>
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </main>

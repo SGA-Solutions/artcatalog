@@ -50,22 +50,34 @@ export default async function ArtistPage({ params }: { params: Promise<{ slug: s
                     <div>
                         <h2 className="text-2xl font-light mb-12 border-t border-gray-100 pt-12">Selected Works</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                            {artist.artworks.map((artwork: Artwork) => (
-                                <Link key={artwork.slug.current} href={`/artworks/${artwork.slug.current}`} className="group block">
-                                    <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-shadow hover:shadow-museum">
-                                        {artwork.image && (
-                                            /* eslint-disable-next-line @next/next/no-img-element */
-                                            <img
-                                                src={urlFor(artwork.image).width(600).url()}
-                                                alt={artwork.title}
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                            />
-                                        )}
-                                    </div>
-                                    <h3 className="text-lg font-light group-hover:text-accent transition-colors">{artwork.title}</h3>
-                                    <p className="text-sm text-gray-400">{artwork.year}</p>
-                                </Link>
-                            ))}
+                            {artist.artworks.map((artwork: Artwork) => {
+                                const thumbnailImage = artwork.artworkType === 'single'
+                                    ? artwork.image
+                                    : artwork.panels?.[0];
+
+                                return (
+                                    <Link key={artwork.slug.current} href={`/artworks/${artwork.slug.current}`} className="group block">
+                                        <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-shadow hover:shadow-museum relative">
+                                            {thumbnailImage && (
+                                                /* eslint-disable-next-line @next/next/no-img-element */
+                                                <img
+                                                    src={urlFor(thumbnailImage).width(600).url()}
+                                                    alt={artwork.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                />
+                                            )}
+                                            {/* Badge for multi-panel artworks */}
+                                            {artwork.artworkType && artwork.artworkType !== 'single' && (
+                                                <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                    {artwork.artworkType === 'diptych' ? '2 Panels' : '3 Panels'}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <h3 className="text-lg font-light group-hover:text-accent transition-colors">{artwork.title}</h3>
+                                        <p className="text-sm text-gray-400">{artwork.year}</p>
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

@@ -14,7 +14,9 @@ export const homePageQuery = groq`
     "artworks": artworks[]->{
       title,
       slug,
+      artworkType,
       image,
+      panels,
       artist->{name}
     }
   }
@@ -37,7 +39,9 @@ export const exhibitionQuery = groq`
       _id,
       title,
       slug,
+      artworkType,
       image,
+      panels,
       year,
       artist->{name}
     }
@@ -54,7 +58,9 @@ export const artistQuery = groq`
     "artworks": *[_type == "artwork" && references(^._id)] {
       title,
       slug,
+      artworkType,
       image,
+      panels,
       year
     }
   }
@@ -65,7 +71,9 @@ export const artworkPathsQuery = groq`*[_type == "artwork" && defined(slug.curre
 export const artworkQuery = groq`
   *[_type == "artwork" && slug.current == $slug][0] {
     title,
+    artworkType,
     image,
+    panels,
     year,
     medium,
     dimensions,

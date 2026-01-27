@@ -12,7 +12,9 @@ export interface Artwork {
     title: string;
     slug: { current: string };
     artist?: Artist;
+    artworkType?: 'single' | 'diptych' | 'triptych';
     image?: any;
+    panels?: any[];
     year?: string;
     medium?: string;
     dimensions?: string;

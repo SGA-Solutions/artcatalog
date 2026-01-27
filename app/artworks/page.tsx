@@ -9,7 +9,9 @@ const allArtworksQuery = groq`
   *[_type == "artwork"] | order(_createdAt desc) {
     title,
     slug,
+    artworkType,
     image,
+    panels,
     year,
     artist->{name, slug}
   }
@@ -30,23 +32,35 @@ export default async function ArtworksPage() {
 
                 {artworks && artworks.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        {artworks.map((artwork: any) => (
-                            <Link key={artwork.slug.current} href={`/artworks/${artwork.slug.current}`} className="group block">
-                                <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-shadow hover:shadow-museum">
-                                    {artwork.image && (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img
-                                            src={urlFor(artwork.image).width(600).url()}
-                                            alt={artwork.title}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
-                                    )}
-                                </div>
-                                <h3 className="text-lg font-light group-hover:text-accent transition-colors">{artwork.title}</h3>
-                                <p className="text-sm text-gray-500">{artwork.artist?.name}</p>
-                                {artwork.year && <p className="text-xs text-gray-400">{artwork.year}</p>}
-                            </Link>
-                        ))}
+                        {artworks.map((artwork: any) => {
+                            const thumbnailImage = artwork.artworkType === 'single'
+                                ? artwork.image
+                                : artwork.panels?.[0];
+
+                            return (
+                                <Link key={artwork.slug.current} href={`/artworks/${artwork.slug.current}`} className="group block">
+                                    <div className="aspect-[3/4] bg-gray-50 mb-4 overflow-hidden shadow-sm transition-shadow hover:shadow-museum relative">
+                                        {thumbnailImage && (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={urlFor(thumbnailImage).width(600).url()}
+                                                alt={artwork.title}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                        )}
+                                        {/* Badge for multi-panel artworks */}
+                                        {artwork.artworkType && artwork.artworkType !== 'single' && (
+                                            <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                {artwork.artworkType === 'diptych' ? '2 Panels' : '3 Panels'}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className="text-lg font-light group-hover:text-accent transition-colors">{artwork.title}</h3>
+                                    <p className="text-sm text-gray-500">{artwork.artist?.name}</p>
+                                    {artwork.year && <p className="text-xs text-gray-400">{artwork.year}</p>}
+                                </Link>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-[40vh]">

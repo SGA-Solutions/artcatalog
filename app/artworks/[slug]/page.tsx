@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import InquiryForm from "@/components/InquiryForm";
 import ViewInRoomModal from "@/components/ViewInRoomModal";
+import MultiPanelArtwork from "@/components/MultiPanelArtwork";
 
 export async function generateStaticParams() {
     const slugs = await client.fetch(artworkPathsQuery);
@@ -21,8 +22,6 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
         notFound();
     }
 
-    const imageUrl = artwork.image ? urlFor(artwork.image).width(1200).url() : null;
-
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
@@ -30,17 +29,22 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
             <main className="flex-grow pt-32 px-6 mx-auto max-w-[1800px] w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
                     {/* Image Section */}
-                    <div className="bg-white p-8 shadow-museum flex flex-col items-center justify-center min-h-[60vh]">
-                        {imageUrl && (
-                            <>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={imageUrl}
-                                    alt={artwork.title}
-                                    className="max-h-[80vh] w-auto object-contain"
-                                />
-                                <ViewInRoomModal imageUrl={imageUrl} />
-                            </>
+                    <div>
+                        <MultiPanelArtwork
+                            artworkType={artwork.artworkType || 'single'}
+                            image={artwork.image}
+                            panels={artwork.panels}
+                            title={artwork.title}
+                        />
+                        {/* View in Room Modal - uses first panel for multi-panel artworks */}
+                        {(artwork.image || (artwork.panels && artwork.panels.length > 0)) && (
+                            <ViewInRoomModal
+                                imageUrl={
+                                    artwork.artworkType === 'single'
+                                        ? urlFor(artwork.image).width(1200).url()
+                                        : urlFor(artwork.panels[0]).width(1200).url()
+                                }
+                            />
                         )}
                     </div>
 

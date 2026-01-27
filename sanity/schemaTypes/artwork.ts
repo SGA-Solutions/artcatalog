@@ -29,13 +29,71 @@ export default defineType({
             validation: (rule) => rule.required(),
         }),
         defineField({
+            name: 'artworkType',
+            title: 'Artwork Type',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Single Panel', value: 'single' },
+                    { title: 'Diptych (2 Panels)', value: 'diptych' },
+                    { title: 'Triptych (3 Panels)', value: 'triptych' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'single',
+            validation: (rule) => rule.required(),
+        }),
+        defineField({
             name: 'image',
             title: 'Image',
             type: 'image',
             options: {
                 hotspot: true,
             },
-            validation: (rule) => rule.required(),
+            hidden: ({ document }) => document?.artworkType !== 'single',
+            validation: (rule) => rule.custom((value, context) => {
+                const artworkType = (context.document as any)?.artworkType;
+                if (artworkType === 'single' && !value) {
+                    return 'Image is required for single panel artworks';
+                }
+                return true;
+            }),
+        }),
+        defineField({
+            name: 'panels',
+            title: 'Panels',
+            type: 'array',
+            of: [
+                {
+                    type: 'image',
+                    options: { hotspot: true },
+                    fields: [
+                        {
+                            name: 'position',
+                            title: 'Position',
+                            type: 'string',
+                            options: {
+                                list: [
+                                    { title: 'Left', value: 'left' },
+                                    { title: 'Center', value: 'center' },
+                                    { title: 'Right', value: 'right' },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            hidden: ({ document }) => document?.artworkType === 'single',
+            validation: (rule) => rule.custom((value, context) => {
+                const artworkType = (context.document as any)?.artworkType;
+                if (artworkType === 'diptych' && (!value || value.length !== 2)) {
+                    return 'Diptych artworks must have exactly 2 panels';
+                }
+                if (artworkType === 'triptych' && (!value || value.length !== 3)) {
+                    return 'Triptych artworks must have exactly 3 panels';
+                }
+                return true;
+            }),
         }),
         defineField({
             name: 'year',
